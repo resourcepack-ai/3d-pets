@@ -1,0 +1,5 @@
+The Labrador is based on "Labrador Dog" (https://sketchfab.com/3d-models/labrador-dog-1f56cfbab07e4fe49b5d9e521c82073a)
+by kenchoo (https://sketchfab.com/kenchoo), licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/);
+itself based on "Dog" (https://skfb.ly/oHLVz) by all of life, CC-BY-4.0. Decimated, retextured smaller and re-animated.
+
+Animation: "Shiba Inu" by Quaternius (https://quaternius.com), CC0, retargeted onto the Labrador.

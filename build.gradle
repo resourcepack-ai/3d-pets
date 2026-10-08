@@ -1,0 +1,6 @@
+version = '0.1.0'
+base { archivesName = '3DPets' }
+
+dependencies {
+    compileOnly project(':engine')
+}

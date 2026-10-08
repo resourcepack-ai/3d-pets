@@ -1,0 +1,16 @@
+name: 3DPets
+version: ${version}
+main: ai.resourcepack.pets3d.Pets3D
+api-version: '1.21'
+depend: [3DEngine]
+description: A real 3D dog that follows you, sits and plays fetch. Built on 3D Engine.
+website: https://resourcepack.ai
+commands:
+  pet:
+    description: Summon or send home your dog; /pet sit, /pet ball.
+    usage: /pet [sit|ball]
+    permission: 3dpets.use
+permissions:
+  3dpets.use:
+    description: Have a dog.
+    default: true

@@ -1,0 +1,57 @@
+# The Labrador: kenchoo's mesh, moved by Quaternius' Shiba Inu clips.
+height: 0.85
+triangles: 3500
+texture-width: 256
+animations-from: labrador-motion.glb
+retarget:
+  translate: [Body, IKFrontLeg.L, IKFrontLeg.R, IKBackLeg.L, IKBackLeg.R]
+# The back claws hang off a helper bone nothing animates.
+rebind: [neutral_bone]
+legs:
+  - {chain: [BackLeg.L, BackUpperLeg.L, BackLowerLeg.L], target: IKBackLeg.L}
+  - {chain: [FrontUpperLeg.L, FrontLowerLeg.L], target: IKFrontLeg.L}
+  - {chain: [BackLeg.R, BackUpperLeg.R, BackLowerLeg.R], target: IKBackLeg.R}
+  - {chain: [FrontUpperLeg.R, FrontLowerLeg.R], target: IKFrontLeg.R}
+points:
+  mouth: {bone: Head, at: [0, 2.08, 2.42]}
+default-state: idle
+states:
+  idle: {clip: Idle, fps: 6, syncs: 2}
+  walk: {clip: Walk, fps: 20, syncs: 3, wait: true}
+  run: {clip: Gallop, fps: 20, syncs: 2, wait: true}
+  sniff: {clip: Idle_2_HeadLow, fps: 6, syncs: 2}
+  sit:
+    clip: Idle
+    fps: 6
+    syncs: 2
+    pose:
+      Body: {rotate: [-48, 0, 0], translate: [0, -0.3, 0.75]}
+      IKFrontLeg.L: {translate: [0, 0, -0.4]}
+      IKFrontLeg.R: {translate: [0, 0, -0.4]}
+      IKBackLeg.L: {translate: [0, 0, 0.55]}
+      IKBackLeg.R: {translate: [0, 0, 0.55]}
+      Tail1: {rotate: [40, 0, 0]}
+      Neck1: {rotate: [-20, 0, 0]}
+      Head: {rotate: [-22, 0, 0]}
+  # Turning on the spot: a walk half-way to standing is a shuffle.
+  turn: {clip: Walk, fps: 20, syncs: 3, wait: true, blend: {clip: Idle, weight: 0.45}}
+  pickup: {clip: Eating, fps: 10, sync-at: [12], wait: true}
+transition-frames: 6
+transitions:
+  - idle <-> walk
+  - walk <-> run
+  - {from: idle, to: sniff, frames: 8, both-ways: true}
+  - {from: idle, to: sit, frames: 14}
+  - {from: sit, to: idle, frames: 12}
+  - idle <-> turn
+  - turn -> walk
+  - {from: walk, to: pickup, frames: 8}
+  - {from: pickup, to: walk, frames: 8}
+  - {from: pickup, to: idle, frames: 8}
+locomotion:
+  idle: idle
+  walk: walk
+  run: run
+  turn: turn
+  walk-above: 0.035
+  run-above: 0.13
