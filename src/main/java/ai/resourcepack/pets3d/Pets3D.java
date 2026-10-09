@@ -95,6 +95,10 @@ public final class Pets3D extends JavaPlugin implements Listener {
         }
 
         void setFetch(Fetch next) {
+            // Following its owner would take over whenever the fetch stands
+            // still: thrown far, it turned for home mid pick-up.
+            if (next == Fetch.NONE) legs.follow(owner);
+            else if (fetch == Fetch.NONE) legs.unfollow();
             fetch = next;
             fetchTicks = 0;
         }
@@ -382,6 +386,12 @@ public final class Pets3D extends JavaPlugin implements Listener {
 
         carry(pet);
 
+        if (debug && pet.ball != null && (pet.fetch == Fetch.GO || pet.fetch == Fetch.PICKUP)) {
+            Location b = pet.ball.location();
+            getLogger().info(String.format("trace %s t%d %s dog %.2f %.2f %.2f yaw %.0f ball %.2f %.2f %.2f d %.2f speed %.3f going %s",
+                    pet.fetch, pet.fetchTicks, pet.body.state(), now.getX(), now.getY(), now.getZ(), pet.body.location().getYaw(),
+                    b.getX(), b.getY(), b.getZ(), Math.hypot(b.getX() - now.getX(), b.getZ() - now.getZ()), pet.legs.speed(), pet.legs.going()));
+        }
         if (debug && time % 10 == 0) {
             String line = String.format("%s (hold %s)  fetch %s  speed %.3f", pet.body.state(), hold, pet.fetch, pet.legs.speed());
             pet.owner.sendActionBar(Component.text(line));
