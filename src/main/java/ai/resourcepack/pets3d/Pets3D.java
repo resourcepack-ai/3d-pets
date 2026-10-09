@@ -84,6 +84,9 @@ public final class Pets3D extends JavaPlugin implements Listener {
         boolean carrying;
         int fetchTicks;
         Location ballFrom;
+        /** How far ahead of its feet the mouth reaches into the pick-up: measured at each one. */
+        double reach = 0.9;
+        int tries;
 
         Pet(Player owner, ModelInstance body, Mover legs) {
             this.owner = owner;
@@ -183,6 +186,7 @@ public final class Pets3D extends JavaPlugin implements Listener {
                 Location rest = restingPlace(ahead.add(0, 3, 0));
                 if (rest == null) return true;
                 pet.ball = engine.spawn(BALL, rest);
+                pet.tries = 0;
                 pet.autoSat = false;
                 pet.sit(false);
                 pet.setFetch(Fetch.GO);
@@ -298,6 +302,7 @@ public final class Pets3D extends JavaPlugin implements Listener {
         }
         pet.thrown = null;
         pet.ball = engine.spawn(BALL, rest);
+        pet.tries = 0;
         pet.setFetch(Fetch.GO);
     }
 
@@ -401,14 +406,22 @@ public final class Pets3D extends JavaPlugin implements Listener {
                 return null;
             }
             case GO -> {
+                // Make for where it stands with its mouth over the ball, and let
+                // the legs brake into it. Stopped the moment it got near, a dog
+                // at a gallop slid on past and had the ball behind it.
                 Location b = pet.ball.location();
-                pet.legs.goTo(b, RUN, 0.5);
-                if (b.getWorld() == w.getWorld() && Math.hypot(b.getX() - w.getX(), b.getZ() - w.getZ()) < 1.1 && Math.abs(b.getY() - w.getY()) < 1.5) {
-                    pet.legs.stop();
-                    pet.setFetch(Fetch.PICKUP);
-                } else if (pet.fetchTicks > 20 * 20) {
+                if (b.getWorld() != w.getWorld() || pet.fetchTicks > 20 * 20) {
                     giveBack(pet);
+                    return null;
                 }
+                double dx = b.getX() - w.getX(), dz = b.getZ() - w.getZ(), d = Math.hypot(dx, dz);
+                Location stand = d < 0.01 ? w.clone() : b.clone().subtract(dx / d * pet.reach, 0, dz / d * pet.reach);
+                if (Math.hypot(stand.getX() - w.getX(), stand.getZ() - w.getZ()) < 0.35 && Math.abs(b.getY() - w.getY()) < 1.5) {
+                    pet.legs.stop();
+                    if (pet.legs.speed() < 0.05) pet.setFetch(Fetch.PICKUP);
+                    return null;
+                }
+                pet.legs.goTo(stand, d > 4 ? RUN : TROT, 0.2);
                 return null;
             }
             case PICKUP -> {
@@ -418,6 +431,16 @@ public final class Pets3D extends JavaPlugin implements Listener {
                 // before: miss that tick and the head stays down a whole loop.
                 pet.legs.face(pet.ball.location());
                 if (!pet.carrying && pet.body.settledIn("pickup") && pet.body.phase() >= 6) {
+                    // Head down: if the mouth is not on the ball, step up to it
+                    // and try again rather than pull the ball across to it.
+                    Location mouth = pet.body.point("mouth", 0), b = pet.ball.location();
+                    if (mouth != null && mouth.getWorld() == w.getWorld()) {
+                        pet.reach = Math.hypot(mouth.getX() - w.getX(), mouth.getZ() - w.getZ());
+                        if (Math.hypot(mouth.getX() - b.getX(), mouth.getZ() - b.getZ()) > 0.4 && pet.tries++ < 3) {
+                            pet.setFetch(Fetch.GO);
+                            return null;
+                        }
+                    }
                     pet.carrying = true;
                     pet.ballFrom = pet.ball.location();
                     pet.fetchTicks = 0;
