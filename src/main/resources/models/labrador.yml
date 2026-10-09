@@ -14,6 +14,13 @@ legs:
   - {chain: [FrontUpperLeg.R, FrontLowerLeg.R], target: IKFrontLeg.R}
 points:
   mouth: {bone: Head, at: [0, 2.08, 2.42]}
+# Turns its head to whoever is near, when it is standing or sitting about.
+look:
+  bone: Head
+  yaw: 60
+  pitch: 30
+  range: 7
+  states: [idle, sit, turn]
 default-state: idle
 states:
   idle: {clip: Idle, fps: 6, syncs: 2}

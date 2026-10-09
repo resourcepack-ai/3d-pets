@@ -3,6 +3,7 @@ package ai.resourcepack.pets3d;
 import ai.resourcepack.engine3d.api.Engine3D;
 import ai.resourcepack.engine3d.api.ModelInstance;
 import ai.resourcepack.engine3d.api.Mover;
+import ai.resourcepack.engine3d.api.event.ModelInteractEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -21,9 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -222,10 +221,9 @@ public final class Pets3D extends JavaPlugin implements Listener {
 
     // A right-click on the dog is the owner's say: sit, or get up.
     @EventHandler
-    public void onInteract(PlayerInteractEntityEvent event) {
-        if (event.getHand() != EquipmentSlot.HAND) return;
+    public void onInteract(ModelInteractEvent event) {
         Pet pet = pets.get(event.getPlayer().getUniqueId());
-        if (pet == null || !event.getRightClicked().equals(pet.legs.brain())) return;
+        if (pet == null || event.getModel() != pet.legs.body()) return;
         event.setCancelled(true);
         if (pet.fetch != Fetch.NONE) return;
         pet.autoSat = false;
