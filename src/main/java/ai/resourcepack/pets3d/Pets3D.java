@@ -174,6 +174,19 @@ public final class Pets3D extends JavaPlugin implements Listener {
                 player.getInventory().addItem(ball());
                 player.sendMessage(Component.text("A tennis ball. Throw it and your dog will fetch it.", NamedTextColor.GRAY));
             }
+            case "throw" -> {
+                // For testing from the console: a ball lands this many blocks
+                // ahead of the player and the dog goes for it.
+                double far = args.length > 1 ? Double.parseDouble(args[1]) : 15;
+                if (pet == null || pet.fetch != Fetch.NONE) return true;
+                Location ahead = player.getLocation().add(player.getLocation().getDirection().setY(0).normalize().multiply(far));
+                Location rest = restingPlace(ahead.add(0, 3, 0));
+                if (rest == null) return true;
+                pet.ball = engine.spawn(BALL, rest);
+                pet.autoSat = false;
+                pet.sit(false);
+                pet.setFetch(Fetch.GO);
+            }
             case "debug" -> {
                 debug = !debug;
                 player.sendMessage("3D Pets debug " + (debug ? "on" : "off"));
@@ -469,5 +482,9 @@ public final class Pets3D extends JavaPlugin implements Listener {
             at = pet.ballFrom.clone().add(at.toVector().subtract(pet.ballFrom.toVector()).multiply(pet.fetchTicks / 5.0));
         }
         pet.ball.teleport(at);
+        if (debug && pet.owner.getWorld().getGameTime() % 5 == 0)
+            getLogger().info(String.format("carry: %s %s, ball %.2f from the mouth, dog %.1f from you, ball display %s",
+                    pet.body.state(), pet.fetch, pet.ball.location().distance(at), pet.body.location().distance(pet.owner.getLocation()),
+                    pet.ball.display().isValid() ? "ok" : "gone"));
     }
 }
