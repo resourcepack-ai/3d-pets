@@ -4,9 +4,9 @@ import ai.resourcepack.engine3d.api.Engine3D;
 import ai.resourcepack.engine3d.api.ModelInstance;
 import ai.resourcepack.engine3d.api.Mover;
 import ai.resourcepack.engine3d.api.event.ModelInteractEvent;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -169,7 +169,7 @@ public final class Pets3D extends JavaPlugin implements Listener {
         String sub = args.length > 0 ? args[0].toLowerCase() : "";
         // The testing tools: debug logs every tick of every fetch, so not for everyone.
         if ((sub.equals("throw") || sub.equals("debug")) && !sender.hasPermission("3dpets.admin")) {
-            player.sendMessage(Component.text("You don't have permission to do that.", NamedTextColor.GRAY));
+            player.sendMessage(ChatColor.GRAY + "You don't have permission to do that.");
             return true;
         }
         Pet pet = pets.get(player.getUniqueId());
@@ -183,7 +183,7 @@ public final class Pets3D extends JavaPlugin implements Listener {
             case "ball" -> {
                 if (!engine.ready()) return notReady(player);
                 player.getInventory().addItem(ball());
-                player.sendMessage(Component.text("A tennis ball. Throw it and your dog will fetch it.", NamedTextColor.GRAY));
+                player.sendMessage(ChatColor.GRAY + "A tennis ball. Throw it and your dog will fetch it.");
             }
             case "throw" -> {
                 // For testing from the console: a ball lands this many blocks
@@ -206,11 +206,11 @@ public final class Pets3D extends JavaPlugin implements Listener {
                 if (pet != null) {
                     remove(pet);
                     pets.remove(player.getUniqueId());
-                    player.sendMessage(Component.text("Your dog went home.", NamedTextColor.GRAY));
+                    player.sendMessage(ChatColor.GRAY + "Your dog went home.");
                 } else {
                     if (!engine.ready() || engine.model(DOG).isEmpty()) return notReady(player);
                     pets.put(player.getUniqueId(), spawn(player));
-                    player.sendMessage(Component.text("Here's your dog. Right-click it to make it sit, /pet ball for a ball.", NamedTextColor.GRAY));
+                    player.sendMessage(ChatColor.GRAY + "Here's your dog. Right-click it to make it sit, /pet ball for a ball.");
                 }
             }
         }
@@ -218,7 +218,7 @@ public final class Pets3D extends JavaPlugin implements Listener {
     }
 
     private boolean notReady(Player p) {
-        p.sendMessage(Component.text("The dog isn't ready yet (3D Engine is still baking it).", NamedTextColor.GRAY));
+        p.sendMessage(ChatColor.GRAY + "The dog isn't ready yet (3D Engine is still baking it).");
         return true;
     }
 
@@ -257,9 +257,11 @@ public final class Pets3D extends JavaPlugin implements Listener {
     // ---- the ball ------------------------------------------------------------------
 
     private ItemStack ball() {
-        ItemStack item = engine.item(BALL, null).withType(Material.SNOWBALL);
+        ItemStack model = engine.item(BALL, null);
+        ItemStack item = new ItemStack(Material.SNOWBALL);
+        item.setItemMeta(getServer().getItemFactory().asMetaFor(model.getItemMeta(), Material.SNOWBALL));
         ItemMeta meta = item.getItemMeta();
-        meta.itemName(Component.text("Tennis Ball", NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false));
+        meta.setItemName(ChatColor.YELLOW + "Tennis Ball");
         meta.getPersistentDataContainer().set(IS_BALL, PersistentDataType.BYTE, (byte) 1);
         item.setItemMeta(meta);
         return item;
@@ -399,7 +401,7 @@ public final class Pets3D extends JavaPlugin implements Listener {
         }
         if (debug && time % 10 == 0) {
             String line = String.format("%s (hold %s)  fetch %s  speed %.3f", pet.body.state(), hold, pet.fetch, pet.legs.speed());
-            pet.owner.sendActionBar(Component.text(line));
+            pet.owner.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(line));
             getLogger().info(line);
         }
     }
