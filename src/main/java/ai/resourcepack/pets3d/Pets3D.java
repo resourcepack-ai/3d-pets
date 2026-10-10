@@ -167,6 +167,11 @@ public final class Pets3D extends JavaPlugin implements Listener {
             return true;
         }
         String sub = args.length > 0 ? args[0].toLowerCase() : "";
+        // The testing tools: debug logs every tick of every fetch, so not for everyone.
+        if ((sub.equals("throw") || sub.equals("debug")) && !sender.hasPermission("3dpets.admin")) {
+            player.sendMessage(Component.text("You don't have permission to do that.", NamedTextColor.GRAY));
+            return true;
+        }
         Pet pet = pets.get(player.getUniqueId());
         switch (sub) {
             case "sit" -> {

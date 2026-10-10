@@ -14,3 +14,6 @@ permissions:
   3dpets.use:
     description: Have a dog.
     default: true
+  3dpets.admin:
+    description: The testing tools, /pet debug and /pet throw.
+    default: op
