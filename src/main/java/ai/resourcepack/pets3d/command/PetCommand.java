@@ -69,7 +69,15 @@ public final class PetCommand implements CommandExecutor, TabCompleter {
             case "throw" -> {
                 // For testing from the console: a ball lands this many blocks
                 // ahead of the player and the dog goes for it.
-                double far = args.length > 1 ? Double.parseDouble(args[1]) : 15;
+                double far = 15;
+                if (args.length > 1) {
+                    try {
+                        far = Double.parseDouble(args[1]);
+                    } catch (NumberFormatException e) {
+                        actor.sendMessage(ChatColor.RED + "Not a distance: " + args[1]);
+                        return true;
+                    }
+                }
                 pets.throwBall(player, far);
             }
             case "debug" -> {
