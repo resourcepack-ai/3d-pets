@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -60,6 +61,8 @@ public final class Pets3D extends JavaPlugin implements Listener {
     static final String BALL = "3dpets/ball";
     private static final List<String> FILES = List.of("labrador.glb", "labrador-motion.glb", "labrador.yml", "ball.obj", "ball.mtl", "ball.png", "ball.yml");
     private static final NamespacedKey IS_BALL = new NamespacedKey("3dpets", "ball");
+    /** The testing subcommands, each behind its own 3dpets.<sub> node (3dpets.admin grants both). */
+    private static final List<String> TOOLS = List.of("throw", "debug");
 
     /** Run and trot speeds while fetching, blocks per tick. */
     private static final double RUN = 0.24, TROT = 0.19;
@@ -188,6 +191,8 @@ public final class Pets3D extends JavaPlugin implements Listener {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String @NotNull [] args) {
+        // Permissions are the sender's own, also when the console acts as a player below.
+        CommandSender actor = sender;
         // From the console: /pet <player> [sub].
         if (!(sender instanceof Player) && args.length > 0 && getServer().getPlayerExact(args[0]) != null) {
             sender = getServer().getPlayerExact(args[0]);
@@ -198,9 +203,9 @@ public final class Pets3D extends JavaPlugin implements Listener {
             return true;
         }
         String sub = args.length > 0 ? args[0].toLowerCase() : "";
-        // The testing tools: debug logs every tick of every fetch, so not for everyone.
-        if ((sub.equals("throw") || sub.equals("debug")) && !sender.hasPermission("3dpets.admin")) {
-            player.sendMessage(ChatColor.GRAY + "You don't have permission to do that.");
+        // The testing tools, a node each: debug logs every tick of every fetch, so not for everyone.
+        if (TOOLS.contains(sub) && !actor.hasPermission("3dpets." + sub)) {
+            actor.sendMessage(ChatColor.GRAY + "You need 3dpets." + sub + " for that.");
             return true;
         }
         Pet pet = pets.get(player.getUniqueId());
@@ -246,6 +251,18 @@ public final class Pets3D extends JavaPlugin implements Listener {
             }
         }
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String @NotNull [] args) {
+        // The console names a player first: let the server offer the names.
+        if (!(sender instanceof Player)) return null;
+        if (args.length != 1) return List.of();
+        // Only what they may run: the testing tools are left out for anybody without their node.
+        List<String> out = new ArrayList<>();
+        for (String sub : List.of("sit", "ball", "throw", "debug"))
+            if (sub.startsWith(args[0].toLowerCase()) && (!TOOLS.contains(sub) || sender.hasPermission("3dpets." + sub))) out.add(sub);
+        return out;
     }
 
     private boolean notReady(Player p) {

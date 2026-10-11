@@ -41,8 +41,8 @@ of an addon. Players need nothing installed.
 | `/pet` | Calls your dog, or sends it home |
 | `/pet sit` | Sit or stand (or right-click the dog) |
 | `/pet ball` | A tennis ball to throw |
-| `/pet debug` | Op: logs every step of every fetch |
-| `/pet throw [blocks]` | Op: lands a ball that far ahead and sends your dog for it |
+| `/pet debug` | Testing: traces every fetch, for every dog, to the console and action bar |
+| `/pet throw [blocks]` | Testing: lands a ball that far ahead and sends your dog for it |
 
 From the console, `/pet <player> [subcommand]` acts for that player.
 
@@ -51,7 +51,9 @@ Every player can have one dog. It goes home when its owner leaves.
 | Permission | Default | |
 |---|---|---|
 | `3dpets.use` | everyone | `/pet`, `/pet sit`, `/pet ball` |
-| `3dpets.admin` | op | `/pet debug` and `/pet throw` |
+| `3dpets.debug` | op | `/pet debug` |
+| `3dpets.throw` | op | `/pet throw` |
+| `3dpets.admin` | op | Both testing tools, `3dpets.debug` and `3dpets.throw`, in one line |
 | `3dpets.update` | op | Told when a newer version is out |
 
 ## Configuration

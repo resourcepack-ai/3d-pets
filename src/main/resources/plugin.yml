@@ -15,7 +15,16 @@ permissions:
     description: Have a dog.
     default: true
   3dpets.admin:
-    description: The testing tools, /pet debug and /pet throw.
+    description: Both testing tools, /pet debug and /pet throw. A convenience parent, not a node anything checks.
+    default: op
+    children:
+      3dpets.debug: true
+      3dpets.throw: true
+  3dpets.debug:
+    description: /pet debug, turn fetch tracing on or off for every dog on the server (console and action bar; a testing tool).
+    default: op
+  3dpets.throw:
+    description: /pet throw [blocks], land a ball ahead of you for your dog to fetch (a testing tool).
     default: op
   3dpets.update:
     description: Be told on joining when a newer 3D Pets is on SpigotMC.
