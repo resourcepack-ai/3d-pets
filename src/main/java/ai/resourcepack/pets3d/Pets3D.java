@@ -4,7 +4,11 @@ import ai.resourcepack.engine3d.api.Engine3D;
 import ai.resourcepack.engine3d.api.ModelInstance;
 import ai.resourcepack.engine3d.api.Mover;
 import ai.resourcepack.engine3d.api.event.ModelInteractEvent;
+import ai.resourcepack.common.update.UpdateCheck;
 import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -64,9 +68,13 @@ public final class Pets3D extends JavaPlugin implements Listener {
     /** Ticks a teleported display takes to slide: aim the ball where the mouth will be when it lands. */
     private static final int LEAD = 2;
 
+    /** This plugin's SpigotMC resource id: the number in its page's URL. */
+    private static final int SPIGOT_RESOURCE = 139512;
+
     private Engine3D engine;
     private final Map<UUID, Pet> pets = new HashMap<>();
     private boolean debug;
+    private UpdateCheck updates;
 
     enum Fetch { NONE, CHASE, GO, PICKUP, RETURN, DROP }
 
@@ -112,6 +120,7 @@ public final class Pets3D extends JavaPlugin implements Listener {
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         engine = Engine3D.get();
         installModels();
         getServer().getPluginManager().registerEvents(this, this);
@@ -124,6 +133,27 @@ public final class Pets3D extends JavaPlugin implements Listener {
                 if (pet.owner.isOnline()) pets.put(pet.owner.getUniqueId(), spawn(pet.owner));
             }
         });
+        updates = UpdateCheck.spigot(this, SPIGOT_RESOURCE)
+                .name("3D Pets")
+                .permission("3dpets.update")
+                .enabledWhen(() -> getConfig().getBoolean("update-check", true))
+                .player(this::tellUpdate)
+                .start();
+    }
+
+    /** The join nudge: the sentence, then the link as one clickable piece. */
+    private void tellUpdate(Player player, UpdateCheck.Update update) {
+        BaseComponent words = TextComponent.fromLegacy(
+                ChatColor.GRAY + "3D Pets " + ChatColor.WHITE + update.latest()
+                        + ChatColor.GRAY + " is out (you have " + update.running() + "). ");
+        TextComponent link = new TextComponent("Get it on SpigotMC");
+        link.setColor(net.md_5.bungee.api.ChatColor.YELLOW);
+        link.setUnderlined(true);
+        link.setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, update.url()));
+        link.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                new net.md_5.bungee.api.chat.hover.content.Text(update.url())));
+        // Both go in a fresh component: a deserialised one's extras can't be added to.
+        player.spigot().sendMessage(new TextComponent(words, link));
     }
 
     /** Copies the dog and the ball into the engine's models folder (before its first tick, when it bakes). */
@@ -149,6 +179,7 @@ public final class Pets3D extends JavaPlugin implements Listener {
 
     @Override
     public void onDisable() {
+        if (updates != null) updates.stop();
         pets.values().forEach(this::remove);
         pets.clear();
     }

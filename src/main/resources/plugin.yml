@@ -17,3 +17,6 @@ permissions:
   3dpets.admin:
     description: The testing tools, /pet debug and /pet throw.
     default: op
+  3dpets.update:
+    description: Be told on joining when a newer 3D Pets is on SpigotMC.
+    default: op

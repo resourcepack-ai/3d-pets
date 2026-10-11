@@ -1,0 +1,5 @@
+# 3D Pets
+
+# Tells you in the console, and anybody with 3dpets.update (ops) in chat,
+# when a newer 3D Pets is on SpigotMC.
+update-check: true

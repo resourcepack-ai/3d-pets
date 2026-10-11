@@ -1,0 +1,15 @@
+plugins {
+    // Downloads the Java 21 toolchain the build targets when Gradle runs on another JDK.
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+// Only read when 3D Pets is built on its own. Inside a build that also has
+// 3D Engine's source, that build's settings.gradle includes this directory as
+// its ':pets' project and this file is never looked at.
+rootProject.name = '3d-pets'
+
+// ai.resourcepack:common, the small library our plugins shade in, built from
+// source when it is in this checkout rather than fetched from repo.resourcepack.ai.
+if (file('../../plugin-common').isDirectory()) {
+    includeBuild('../../plugin-common')
+}
