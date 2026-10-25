@@ -38,8 +38,26 @@ public final class Pets3D extends JavaPlugin {
     private UpdateCheck updates;
 
     @Override
+    public void onLoad() {
+        // Asked before the worlds load, so the answer is back for the startup banner.
+        ai.resourcepack.common.update.UpdateCheck.early(this, SPIGOT_RESOURCE);
+    }
+
+    @Override
     public void onEnable() {
         saveDefaultConfig();
+        if (updates != null) updates.stop();
+        updates = UpdateCheck.spigot(this, SPIGOT_RESOURCE)
+                .name("3D Pets")
+                .permission("3dpets.update")
+                .enabledWhen(() -> getConfig().getBoolean("update-check", true))
+                .player(UpdateNotice::tell);
+        ai.resourcepack.common.banner.StartupBanner banner = ai.resourcepack.common.banner.StartupBanner.begin(this)
+                .name("3D Pets")
+                .addonOf("3D Engine")
+                .tagline("A dog that follows you and plays fetch.")
+                .docs("https://resourcepack.ai/docs/3d-pets")
+                .updates(updates);
         Engine3D engine = Engine3D.get();
         Models.install(this, engine);
         TennisBall balls = new TennisBall(engine, getServer());
@@ -55,12 +73,9 @@ public final class Pets3D extends JavaPlugin {
             pet.setExecutor(command);
             pet.setTabCompleter(command);
         }
-        updates = UpdateCheck.spigot(this, SPIGOT_RESOURCE)
-                .name("3D Pets")
-                .permission("3dpets.update")
-                .enabledWhen(() -> getConfig().getBoolean("update-check", true))
-                .player(UpdateNotice::tell)
-                .start();
+        updates.start();
+        banner.ok("Commands", "/pet for a dog");
+        banner.print();
     }
 
     @Override
