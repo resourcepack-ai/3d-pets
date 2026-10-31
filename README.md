@@ -59,7 +59,7 @@ Every player can have one dog. It goes home when its owner leaves.
 ## Configuration
 
 `plugins/3DPets/config.yml` has one switch. `update-check: true` asks SpigotMC
-every six hours whether a newer 3D Pets is out, and if so tells the console and
+as the server starts whether a newer 3D Pets is out, and if so tells the console and
 anybody with `3dpets.update`. Set it to `false` to turn that off.
 
 ## Building
